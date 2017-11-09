@@ -1,0 +1,6 @@
+# package directories
+node_modules
+site
+
+# Serverless directories
+.zip

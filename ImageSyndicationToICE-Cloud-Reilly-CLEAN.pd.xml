@@ -1,0 +1,224 @@
+<in_fu>
+  <process xmlns="http://schemas.active-endpoints.com/appmodules/screenflow/2010/10/avosScreenflow.xsd" xmlns:types1="http://schemas.active-endpoints.com/appmodules/repository/2010/10/avrepository.xsd" xmlns:aetgt="http://schemas.active-endpoints.com/appmodules/repository/2010/10/avrepository.xsd" xmlns:list="urn:activevos:spi:list:functions" name="ImageSyndicationToICE-Cloud-Reilly">
+    <appliesTo/>
+    <description>WHG iPaaS Service: Process to fetch image metadata from AEM and post it on to WHG S3.</description>
+    <tags>reilly</tags>
+    <generator>Informatica Process Designer 8</generator>
+    <flow id="a">
+      <start id="b">
+        <link id="j7fyofxj" targetId="j7fyofxi"/>
+      </start>
+      <assignment id="j7fyofxi">
+        <title>Initializing values for ImageSyndicationProcess</title>
+        <link id="j7fyog21" targetId="j7fyog20"/>
+      </assignment>
+      <subflow id="j7fyog20">
+        <title>genericLogProcess - Start</title>
+        <subflowPath>genericLogProcess</subflowPath>
+        <link id="j7fyog22" targetId="j6hcn7xl"/>
+      </subflow>
+      <container id="j6hcn7xl" type="exclusive">
+        <title>Check for Empty Input</title>
+        <flow id="j6hcn7xs">
+          <assignment id="j6hcn802">
+            <title>Get ImagePath from List</title>
+            <operation source="formula" to="temp.temp_ImagePath">
+              <expression language="XQuery">list:head($temp.temp_ImagePathList)</expression>
+            </operation>
+            <operation source="formula" to="temp.temp_ImagePathList">
+              <expression language="XQuery">list:tail($temp.temp_ImagePathList)</expression>
+            </operation>
+            <link id="j6hcn81v" targetId="j6hcn81u"/>
+          </assignment>
+          <container id="j6hcn81u" type="exclusive">
+            <title>Check if Path is set</title>
+            <flow id="j6hcn824">
+              <eventContainer id="j6yviaug">
+                <service id="j6hcn82f">
+                  <title>Get Image Metadata</title>
+                  <serviceName>AEMConnection:GetFullImageData</serviceName>
+                  <serviceInput>
+                    <parameter name="imgFullPath" source="field" updatable="true">temp.temp_ImagePath</parameter>
+                  </serviceInput>
+                </service>
+                <flow id="j6yviauj">
+                  <container id="j6yviaui" type="exclusive">
+                    <title>Status 200 or Otherwise</title>
+                    <flow id="j6yviavd">
+                      <assignment id="j6yviaw8">
+                        <title>Assign to temp Parameters</title>
+                        <link id="j7itm0ez" targetId="j7fqlgj8"/>
+                      </assignment>
+                      <eventContainer id="j7fqlgj8">
+                        <service id="j6yviax2">
+                          <title>WHG S3 FileWriter</title>
+                          <serviceName>whgS3ConnForIce:AwsS3Writer-Outbound</serviceName>
+                          <serviceInput>
+                            <parameter name="storeS3ObjectRequest" source="field" updatable="true">temp.temp_StoreS3ObjectRequest</parameter>
+                          </serviceInput>
+                        </service>
+                        <flow id="j7fqlgjb">
+                          <subflow id="j7h8jbp7">
+                            <title>ICE-ImgMetadataValidation</title>
+                            <subflowPath>ICE-ImgMetadataValidation</subflowPath>
+                            <link id="j7h8jbrb" targetId="j7h8jbra"/>
+                          </subflow>
+                          <container id="j7h8jbra" type="exclusive">
+                            <title>Check for Empty Fields</title>
+                            <flow id="j7h8jbsx">
+                              <assignment id="j7h8jbsw">
+                                <title>Assign Empty Field Error</title>
+                                <link id="j7h8jbxm" targetId="j7h8jbxl"/>
+                              </assignment>
+                              <jumpTo id="j7h8jbxl">
+                                <link id="j7h8jbz1" targetId="j7fqlf0k"/>
+                              </jumpTo>
+                            </flow>
+                            <flow id="j7h8jbt0">
+                              <jumpTo id="j7h8jbui">
+                                <link id="j7h8jbuj" targetId="j6hcn802"/>
+                              </jumpTo>
+                            </flow>
+                            <link id="j7h8jbsu" targetId="j7h8jbsx" type="containerLink"/>
+                            <link id="j7h8jbsv" targetId="j7h8jbt0" type="containerLink"/>
+                          </container>
+                        </flow>
+                        <flow id="j7fqlgjf">
+                          <assignment id="j7fqlgje">
+                            <title>Assign S3 Service fault errors</title>
+                            <link id="j7fqlgns" targetId="j7fqlgnr"/>
+                          </assignment>
+                          <jumpTo id="j7fqlgnr">
+                            <link id="j7fqlgok" targetId="j7fqlf0k"/>
+                          </jumpTo>
+                        </flow>
+                        <link id="j7fqlgj9" targetId="j7fqlgjb" type="containerLink"/>
+                        <events>
+                          <catch faultField="faultInfo" id="j7fqlgj6" interrupting="true">
+                            <link id="j7fqlgjd" targetId="j7fqlgjf" type="containerLink"/>
+                          </catch>
+                        </events>
+                      </eventContainer>
+                    </flow>
+                    <flow id="j6yviavg">
+                      <assignment id="j7fqleyr">
+                        <title>Error Assignment from AEM Service Conn</title>
+                        <link id="j7fqlf0l" targetId="j7fqlf0k"/>
+                      </assignment>
+                      <assignment id="j7fqlf0k">
+                        <title>Assign App Dynamic Input Values - Error</title>
+                        <link id="j7fqlf3s" targetId="j7fqlf3r"/>
+                      </assignment>
+                      <subflow id="j7fqlf3r">
+                        <title>genericLogProcess - Error</title>
+                        <subflowPath>genericLogProcess</subflowPath>
+                        <runForEach>false</runForEach>
+                        <link id="j7fqlf3t" targetId="j6yviavf"/>
+                      </subflow>
+                      <jumpTo id="j6yviavf">
+                        <link id="j6yviavq" targetId="j6hcn802"/>
+                      </jumpTo>
+                    </flow>
+                    <link id="j6yviava" targetId="j6yviavd" type="containerLink">
+                    </link>
+                    <link id="j6yviavb" targetId="j6yviavg" type="containerLink"/>
+                  </container>
+                </flow>
+                <flow id="j6yviaun">
+                  <assignment id="j7fqlewc">
+                    <title>Assign AEM Service fault errors</title>
+                    <link id="j7fqlg7a" targetId="j7fqlg78"/>
+                  </assignment>
+                  <jumpTo id="j7fqlg78">
+                    <link id="j7fqlg79" targetId="j7fqlf0k"/>
+                  </jumpTo>
+                </flow>
+                <link id="j6yviauh" targetId="j6yviauj" type="containerLink"/>
+                <events>
+                  <catch faultField="faultInfo" id="j6yviaue" interrupting="true">
+                    <link id="j6yviaul" targetId="j6yviaun" type="containerLink"/>
+                  </catch>
+                </events>
+              </eventContainer>
+            </flow>
+            <flow id="j6hcn827">
+              <assignment id="j7fyog6d">
+                <title>Assign Success Response</title>
+                <operation source="formula" to="temp.temp_success_summary">
+                </operation>
+                <link id="j7fyog7k" targetId="j7fyog7j"/>
+              </assignment>
+              <subflow id="j7fyog7j">
+                <title>genericLogProcess - Success</title>
+                <subflowPath>genericLogProcess</subflowPath>
+                <link id="j7fyog7l" targetId="j6hcn84n"/>
+              </subflow>
+              <end id="j6hcn84n">
+                <title>End of process - 200</title>
+              </end>
+            </flow>
+            <link id="j6hcn821" targetId="j6hcn824" type="containerLink"/>
+            <link id="j6hcn822" targetId="j6hcn827" type="containerLink"/>
+          </container>
+        </flow>
+        <flow id="j6hcn7xv">
+          <assignment id="j7h8jceq">
+            <title>Error Assignment for Empty Input</title>
+
+
+
+            <operation source="formula" to="temp.temp_inputParams">
+            </operation>
+            <operation source="formula" to="temp.temp_error_summary">
+            </operation>
+            <link id="j7hib1sj" targetId="j7h8jciq"/>
+          </assignment>
+          <subflow id="j7h8jciq">
+            <title>genericLogProcess - Error</title>
+            <subflowPath>genericLogProcess</subflowPath>
+            <runForEach>false</runForEach>
+            <input>
+              <parameter name="inp_summary" source="field" updatable="true">temp.temp_inputParams</parameter>
+              <parameter name="inp_flow" source="constant" updatable="true">Error</parameter>
+              <parameter name="inp_JSONResponse" source="field" updatable="true">temp.temp_error_summary</parameter>
+              <parameter name="inp_processstarttime" source="field" updatable="true">temp.temp_processstarttime</parameter>
+              <parameter name="inp_trans_guid" source="field" updatable="true">temp.temp_trans_guid</parameter>
+              <parameter name="inp_event_name" source="field" updatable="true">temp.temp_event_name</parameter>
+              <parameter name="inp_process_name" source="field" updatable="true">temp.temp_appplication_id</parameter>
+              <parameter name="inp_channel" source="field" updatable="true">temp.temp_channel</parameter>
+              <parameter name="inp_ip_address" source="field" updatable="true">temp.temp_ip_address</parameter>
+              <parameter name="inp_ipass_parentinstance_id" source="field" updatable="true">temp.temp_ipass_parentinstance_id</parameter>
+              <parameter name="inp_service_version" source="field" updatable="true">temp.temp_service_version</parameter>
+            </input>
+            <outputDef>
+              <field name="out_status" type="string">
+                <options>
+                  <option name="required">false</option>
+                </options>
+              </field>
+            </outputDef>
+            <link id="j7h8jcis" targetId="j6hcn7xu"/>
+          </subflow>
+          <end id="j6hcn7xu">
+            <title>End of Process - No content</title>
+            <httpStatus>204</httpStatus>
+          </end>
+        </flow>
+        <link id="j6hcn7xp" targetId="j6hcn7xs" type="containerLink">
+          <condition source="formula">
+            <function name="not-empty">
+              <arg name="field">{$input.in_ImagePathList}</arg>
+            </function>
+          </condition>
+        </link>
+        <link id="j6hcn7xq" targetId="j6hcn7xv" type="containerLink">
+          <condition source="formula">
+            <function name="empty">
+              <arg name="field">{$input.in_ImagePathList}</arg>
+            </function>
+          </condition>
+        </link>
+      </container>
+    </flow>
+  </process>
+</in_fu>
