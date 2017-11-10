@@ -106,18 +106,30 @@ let $linkArray := (
     '}'
     ),
 
+  for $item in $simpleXML//*
+      let $siblings := $item/following-sibling::node()
+      where local-name($item) = 'service' 
+      return for $sibling in $siblings
+        return concat(
+            '{',
+            'from: "', $item/@id, '", ',
+            'to: "', $sibling/@id, '"',
+            '}'
+            ),
+
+
+
+
   for $item in $simpleXML//*    
     let $greatgrandparent := $item/../../..
-    let $name := $item/*:title/text()
-    let $siblings := $item/following-siblings/node()
     where local-name($item) = 'service'
     return concat(
     '{',
-    'from55: "', $siblings[0]/@id, '", ',    
-    'to55: "', $item/@id, '"',
+    'from: "', $greatgrandparent/@id, '", ',    
+    'to: "', $item/@id, '"',
     '}'
-    ),
-    
+    ), 
+
   for $item in $simpleXML//*    
     let $parent := $item/..
     let $grandparent := $item/../..
