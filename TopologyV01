@@ -1,0 +1,14 @@
+
+Flow: Children|NoLink
+
+Assignment: Title|Link
+Service: Title|Link|ServiceName
+SubFlow: Title|Link|SubFlowPathName
+
+Container: Title|Children|LinksToChildren
+EventContainer: NoTitle|Children|LinksToChildren+OptionalLinkToFault(last)
+
+JumpTo: NoTitle|Link
+End: Title|NoLink
+
+
