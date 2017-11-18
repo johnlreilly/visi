@@ -1,0 +1,181 @@
+
+let $simpleXML:= $input.in_fu
+let $nodeArray:= (
+
+
+  for $item in $simpleXML//*    
+    let $name:= $item/*:title/text()
+    where local-name($item) = 'start'
+    return concat(
+    '{',
+    'key: "', $item/@id, '", ',    
+    'type: "', local-name($item), '", ',
+    'name: "', $name, '", ',
+    'id: "', $item/@id, '", ',    
+    'color: "green" ',
+    '}'
+    ),
+
+  for $item in $simpleXML//*    
+    let $name:= $item/*:title/text()
+    where local-name($item) = 'service'
+    return concat(
+    '{',
+    'key: "', $item/@id, '", ',    
+    'type: "', local-name($item), '", ',
+    'name: "', $name, '", ',
+    'id: "', $item/@id, '", ',      
+    'color: "blue"',
+    '}'
+    ),
+
+  for $item in $simpleXML//*    
+    let $name:= $item/*:title/text()
+    where local-name($item) = 'subflow'
+    return concat(
+    '{',
+    'key: "', $item/@id, '", ',    
+    'type: "', local-name($item), '", ',
+    'name: "', $name, '", ',
+    'id: "', $item/@id, '", ',      
+    'color: "orange", ',    
+    'subflow: "', $item/subflowPath/text(), '" ',      
+    '}'
+    ),
+
+  for $item in $simpleXML//*    
+    let $name:= $item/*:title/text()
+    where local-name($item) = 'assignment'
+    return concat(
+    '{',
+    'key: "', $item/@id, '", ',    
+    'type: "', local-name($item), '", ',
+    'name: "', $name, '", ',
+    'id: "', $item/@id, '", ',      
+    'color: "red"',
+    '}'
+    ),
+
+  for $item in $simpleXML//*    
+    let $name:= $item/*:title/text()
+    where local-name($item) = 'jumpTo'
+    return concat(
+    '{',
+    'key: "', $item/@id, '", ',    
+    'type: "', local-name($item), '", ',
+    'name: "', $name, '", ',
+    'id: "', $item/@id, '", ',     
+    'color: "green"',
+    '}'
+    ),
+
+  for $item in $simpleXML//*    
+    let $name:= $item/*:title/text()
+    where local-name($item) = 'container'
+    return concat(
+    '{',
+    'key: "', $item/@id, '", ',    
+    'type: "', local-name($item), '", ',
+    'name: "', $name, '", ',
+    'id: "', $item/@id, '", ',    
+    'color: "brown"',
+    '}'
+    ),
+
+
+  for $item in $simpleXML//*    
+    let $name:= $item/*:title/text()
+    where local-name($item) = 'end'
+    return concat(
+    '{',
+    'key: "', $item/@id, '", ',    
+    'type: "', local-name($item), '", ',
+    'name: "', $name, '", ',
+    'id: "', $item/@id, '", ',    
+    'color: "black"',
+    '}'
+    )
+)
+
+let $linkArray:= (
+
+  for $item in $simpleXML//*    
+    let $parent:= $item/..
+    where local-name($item) = 'link' and local-name($parent) != 'jumpTo'
+    return concat(
+    '{',
+    'from: "', $parent/@id, '", ',    
+    'to: "', $item/@targetId, '"',
+    '}'
+    ),
+
+  for $item in $simpleXML//*    
+    let $greatgrandparent:= $item/../../..
+    where local-name($item) = 'service'
+    return concat(
+    '{',
+    'from: "', $greatgrandparent/@id, '", ',    
+    'to: "', $item/@id, '"',
+    '}'
+    ), 
+    
+  for $item in $simpleXML//*    
+    let $parent:= $item/..
+    let $children:= $item/child::*
+    where local-name($item) = 'flow'
+        return concat(
+            '{',
+            'from: "', $parent/@id, '", ',
+            'to: "', $children[1]/@id, '"',
+            '}'
+            ),
+            
+  for $item in $simpleXML//*    
+    let $parent:= $item/..
+    let $grandparent:= $item/../..
+    where local-name($parent) = 'eventContainer' 
+    return concat(
+    '{',
+    'from: "', $grandparent/@id, '", ',    
+    'to: "', $item/@id, '"',
+    '}'
+    ),
+
+  for $item in $simpleXML//*
+    let $siblings:= $item/following-sibling::node()
+    where local-name($item) = 'service' 
+    return for $sibling in $siblings
+        return concat(
+            '{',
+            'from: "', $item/@id, '", ',
+            'to: "', $sibling/*:container/@id, '"',
+            '}'
+            ),
+
+  for $item in $simpleXML//*
+    let $siblings:= $item/following-sibling::node()
+    where local-name($item) = 'service' 
+    return for $sibling in $siblings
+        return concat(
+            '{',
+            'from: "', $item/@id, '", ',
+            'to: "', $sibling/*:assignment/@id, '"',
+            '}'
+            ),
+
+  for $item in $simpleXML//*
+    let $siblings:= $item/following-sibling::node()
+    where local-name($item) = 'service' 
+    return for $sibling in $siblings
+        return concat(
+            '{',
+            'from: "', $item/@id, '", ',
+            'to: "', $sibling/*:subflow/@id, '"',
+            '}'
+            )
+)
+
+return concat(
+    '"nodes":[', string-join($nodeArray, ', '), '],', 
+    '"nodes":[', string-join($linkArray, ', '), ']' 
+)
