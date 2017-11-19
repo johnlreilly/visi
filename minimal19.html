@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Minimal GoJS Sample</title>
+  <meta name="description" content="An almost minimal diagram using a very simple node template and the default link template." />
+  <!-- Copyright 1998-2017 by Northwoods Software Corporation. -->
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="../release/go-debug.js"></script>
+  <script src="../assets/js/goSamples.js"></script>  <!-- this is only for the GoJS Samples framework -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+  <style type="text/css">
+  /* @media print specifies CSS rules that only apply when printing */
+  @media print {
+    /* CSS reset to clear styles for printing */
+    html, body, div {
+      margin: 0;
+      padding: 0;
+      border: 0;
+      font-size: 100%;
+      font: inherit;
+      vertical-align: baseline;
+    }
+
+    /* Hide everything on the page */
+    body * {
+      display: none;
+    }
+
+    #content, #myImages, #myImages * {
+      /* Only display the images we want printed */
+      /* all of the image's parent divs
+         leading up to the body must be un-hidden (displayed) too
+         */
+         display: block;
+         /* CSS reset to clear the specific visible divs for printing */
+         margin: 0;
+         padding: 0;
+         border: 0;
+         font-size: 100%;
+         font: inherit;
+         vertical-align: baseline;
+       }
+
+    /* We have line breaks in the DIV
+       to separate the images in the browser,
+       but do not want those line breaks when printing
+       */
+       #myImages br {
+        display: none;
+      }
+
+      img {
+        /* Only some browsers respect this rule: */
+        page-break-inside: avoid;
+        /* Almost all browsers respect this rule: */
+        page-break-after:always;
+      }
+    }
+
+  /* The @page rules specify additional printing directives that browsers may respect
+     Here we suggest printing in landscape (instead of portrait) with a small margin.
+     Browsers, however, are free to ignore or override these suggestions.
+     See also:
+      https://developer.mozilla.org/en-US/docs/CSS/@page
+      https://dev.w3.org/csswg/css3-page/#at-page-rule
+      */
+      @page {
+        /* Some browsers respect rules such as size: landscape */
+        margin: 1cm;
+      }
+    </style>
+
+    <script id="code">
+
+      function generateImages(width, height) {
+        // sanitize input
+        width = parseInt(width);
+        height = parseInt(height);
+        if (isNaN(width)) width = 100;
+        if (isNaN(height)) height = 100;
+        // Give a minimum size of 50x50
+        width = Math.max(width, 50);
+        height = Math.max(height, 50);
+
+        var imgDiv = document.getElementById('myImages');
+        imgDiv.innerHTML = ''; // clear out the old images, if any
+        var db = myDiagram.documentBounds.copy();
+        var boundswidth = db.width;
+        var boundsheight = db.height;
+        var imgWidth = width;
+        var imgHeight = height;
+        var p = db.position.copy();
+        for (var i = 0; i < boundsheight; i += imgHeight) {
+          for (var j = 0; j < boundswidth; j += imgWidth) {
+            img = myDiagram.makeImage({
+              scale: 1,
+              position: new go.Point(p.x + j, p.y + i),
+              size: new go.Size(imgWidth, imgHeight),
+              maxSize: new go.Size(Infinity, Infinity)
+            });
+            // Append the new HTMLImageElement to the #myImages div
+            img.className = 'images';
+            imgDiv.appendChild(img);
+            imgDiv.appendChild(document.createElement('br'));
+          }
+        }
+      }
+
+
+
+
+  </script>
+</head>
+<body style="padding: 25px">
+
+<div class="container">
+    <div id="repo-files" class="dropdown">
+      <select id="file-choices">
+        <ul>Pending
+        </ul>
+      </select>
+    </div>
+</div>
+<div id="sample">
+  <div id="myDiagramDiv" style="border: solid 1px black; 
+    height: 1250px; width: 2800px">
+  </div>
+</div>
+
+<br>
+
+<div style="border: 1px solid gray; padding: 10px; margin-bottom: 20px; width: 2800px">
+  Width: <input id="widthInput" value="2700">
+  Height: <input id="heightInput" value="1000">
+  <button id="makeImages">Generate images for printing</button>
+</div>
+
+<br>
+<div id="myImages"></div>
+</body>
+</html>
+
+<script type="text/javascript">
+
+
+// https://api.bitbucket.org/1.0/repositories/{accountname}/{repo_slug}/src/{revision}/{path}
+
+
+  // function processSelected(process) {
+  //     getBitBucketXml(processName);
+  // }
+
+function initDiagram() {
+
+  var $ = go.GraphObject.make;  // for conciseness in defining templates
+
+  myDiagram =
+
+  $(go.Diagram, "myDiagramDiv",
+      { // start everything in the middle of the viewport
+        // initialContentAlignment: go.Spot.TopLeft,
+        initialDocumentSpot: go.Spot.TopLeft,
+        initialViewportSpot: go.Spot.TopLeft,
+        "undoManager.isEnabled": true,
+        padding: 40,
+      });
+
+  myDiagram.nodeTemplate =
+  $(go.Node, "Auto", 
+
+    $(go.Panel, "Vertical", { padding: 2 },  // creates outer box line of color
+      new go.Binding("background", "color"),
+
+      $(go.TextBlock, // transparent first block header
+      { 
+        text: "Pending", 
+        stroke: "white",
+        font: "Normal small-caps Normal 24px Open Sans, sans-serif",
+        margin: 10,
+        width: 150, 
+        height: 30, 
+        textAlign: "left", 
+        alignment: go.Spot.Left, 
+        wrap: go.TextBlock.WrapDesiredSize
+      },
+      new go.Binding("text", "type")
+      ),
+
+      $(go.Panel, "Vertical",  // main text panel
+        { background: "white",
+        padding: 2
+      },
+
+        $(go.TextBlock,   // main text block
+          { text: "Pending", 
+          font: "18px sans-serif",
+          background: "white", 
+          textAlign: "left", 
+          alignment: go.Spot.TopLeft, 
+          margin: (10,0,10,10),
+          isMultiline: true, 
+          width: 170,  
+          height: 75, 
+          wrap: go.TextBlock.WrapDesiredSize 
+        },
+        new go.Binding("text", "name")
+        ),
+
+        $(go.Panel, "Horizontal",               
+        {
+          alignment: go.Spot.TopRight, 
+          margin: 10
+        },
+
+        $(go.TextBlock,
+          { text: "Pending", 
+          font: "18px sans-serif",
+          stroke: "red", 
+          textAlign: "left", 
+          alignment: go.Spot.LeftCenter, 
+          width: 150,  
+          height: 20, 
+          wrap: go.TextBlock.WrapDesiredSize 
+        },
+        new go.Binding("text", "id")
+        ),
+
+        $(go.Panel, "Auto",
+          { alignment: go.Spot.Right, 
+            portId: "from", 
+            padding: 2,
+            fromLinkable: true
+            // click: addNodeAndLink 
+          },
+          $(go.Shape, "Circle",
+            { width: 22, 
+              height: 22, 
+              fill: "white", 
+              stroke: "dodgerblue", 
+              strokeWidth: 3 
+            }
+            ),
+          $(go.Shape, "PlusLine",
+            { width: 11, 
+              height: 11, 
+              fill: null, 
+              stroke: "dodgerblue", 
+              strokeWidth: 3 
+            }
+          )
+        ),
+        new go.Binding("text", "name")
+        )
+      )
+    )
+  );
+
+  myDiagram.linkTemplate =
+  $(go.Link,
+    { routing: go.Link.Orthogonal, corner: 5 },
+    $(go.Shape, { strokeWidth: 3, stroke: "#555" })); // the link shape
+
+  myDiagram.layout =
+  $(go.TreeLayout,
+    { angle: 0, 
+      layerSpacing: 45,
+      nodeSpacing: 25
+    }
+  );
+
+  // var processName = "bbOutputCleaned-reilly-enrollProcess.pd.xml"
+  // getBitBucketXml(processName);
+  // {
+  //   visualize(response)
+  // };
+
+  listProcesses('ipaas-process-xml','master');
+  // getBitBucketXml("bbOutputCleaned-reilly-enrollProcess.pd.xml");
+
+}  // end initDiagram
+
+function listProcesses(repo, revision) {
+
+  console.log("Calling BitBucket for List of Files in repo: " + repo);
+  var settings = {
+    "async": true,
+    "crossDomain": true,
+    "url": "https://api.bitbucket.org/1.0/repositories/john_reilly/" + repo + "/src/" + revision + "/",
+    "method": "GET",
+    "headers": {
+      "accept": "application/xml"
+    }
+  }
+
+  $.ajax(settings).done(function (response) {
+    
+    console.log("List of Process Files in BitBucket Repo: " + JSON.stringify(response));
+    var fileNames = "";
+    var files = [];
+    files = response.files;
+    for (i = 0, len = files.length; i < len; i++) { 
+      var path = files[i].path;
+      if (path.endsWith("xml")) {
+        console.log("Path: " + path);
+        fileNames += ("<li><a onclick=\"getBitBucketXml(this.innerHTML)\" href=\"#\">" + path + "</a></li>");
+      }
+    }
+    // alert("Final Choices: " + fileNames);
+    document.getElementById("repo-files").innerHTML = fileNames;
+  });
+
+}
+
+function getBitBucketXml(process) {
+
+  // alert("Process: " + process);
+  var repo = "ipaas-process-xml";
+  var revision = "master";
+  console.log("-------------------------------"),
+  console.log("Calling BitBucket for " + process);
+  var settings = {
+    "async": true,
+    "crossDomain": true,
+    // "url": "https://api.bitbucket.org/1.0/repositories/john_reilly/" + repo + "/src/" + revision + "/" + process,
+    "url": "https://bitbucket.org/john_reilly/ipaas-process-xml/raw/84e85b44e82fe02472294a40ceef612212a7db85/" + process,
+    "method": "GET",
+    "headers": {
+      "accept": "application/xml"
+    }
+  }
+
+  $.ajax(settings).done(function (response) {
+    console.log("Response from BitBucket: " + JSON.stringify(response));
+    visualize(response);
+
+  });
+
+}
+
+
+function visualize(xml) {
+
+  console.log("Start to Visuialize!");
+  var settings = {
+    "async": true,
+    "crossDomain": true,
+    "url": "https://kay7tucfcc.execute-api.us-east-1.amazonaws.com/dev/visualize",
+    "method": "POST",
+    "headers": {
+      "content-type": "application/xml",
+      "accept": "application/json"
+    },
+    "data": xml
+  }
+
+  $.ajax(settings).done(function (response) {
+    console.log("Returned from IPaaS Endpoint: " + JSON.stringify(response));
+    myDiagram.model = new go.GraphLinksModel(response["nodes"], response["links"]);
+
+  });
+
+}
+
+  // BitBucket XML > https://bitbucket.org/john_reilly/ipaas-process-xml/raw/ccd1a9a05d2ff29771d17905b8ab58daf6907ca3/bbOutputCleaned-reilly-enrollProcess.pd.xml
+  // API Gateway > https://kay7tucfcc.execute-api.us-east-1.amazonaws.com/dev/visualize
+
+initDiagram();
+
+</script>
