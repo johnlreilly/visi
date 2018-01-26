@@ -1,0 +1,830 @@
+<process
+	xmlns="http://schemas.active-endpoints.com/appmodules/screenflow/2010/10/avosScreenflow.xsd"
+	xmlns:types1="http://schemas.active-endpoints.com/appmodules/repository/2010/10/avrepository.xsd"
+	xmlns:aetgt="http://schemas.active-endpoints.com/appmodules/repository/2010/10/avrepository.xsd"
+	xmlns:list="urn:activevos:spi:list:functions" name="enrollProcess">
+	<appliesTo/>
+	<description>WHG IPaaS Service : Enroll a new member</description>
+	<tags>WHGWebServices,.anonymous</tags>
+	<generator>Informatica Process Designer 8</generator>
+	<input>
+		<parameter name="headers" type="reference">
+			<options>
+				<option name="referenceTo">$po:HeaderSet</option>
+				<option name="required">false</option>
+				<option name="isCopy">true</option>
+			</options>
+		</parameter>
+		<parameter name="JSONRequest" type="string">
+			<options>
+				<option name="required">false</option>
+			</options>
+		</parameter>
+	</input>
+	<output>
+		<field name="JSONPayload" type="string">
+			<options>
+				<option name="required">false</option>
+			</options>
+		</field>
+		<field name="outErrorCode" type="string">
+			<options>
+				<option name="required">false</option>
+			</options>
+		</field>
+		<field name="cookies" type="reference">
+			<options>
+				<option name="referenceTo">$po:HeaderSet</option>
+				<option name="required">false</option>
+				<option name="isCopy">true</option>
+			</options>
+		</field>
+	</output>
+	<tempFields>
+		<field name="temp_processTitle" type="string">
+			<options>
+				<option name="required">false</option>
+			</options>
+		</field>
+		<field name="temp_application_id" type="string">
+			<options>
+				<option name="required">false</option>
+			</options>
+		</field>
+		<field name="temp_init_Status" type="string">
+			<options>
+				<option name="required">false</option>
+				<option hide="true" name="initialvalue">Error</option>
+			</options>
+		</field>
+		<field name="temp_init_ErrorCode" type="string">
+			<options>
+				<option name="required">false</option>
+				<option name="initialvalue">500</option>
+			</options>
+		</field>
+		<field name="temp_ErrorMessage" type="string">
+			<options>
+				<option name="required">false</option>
+			</options>
+		</field>
+		<field name="temp_init_HttpCode" type="string">
+			<options>
+				<option name="required">false</option>
+				<option hide="true" name="initialvalue">400</option>
+			</options>
+		</field>
+		<field name="temp_summary" type="string">
+			<options>
+				<option name="required">false</option>
+			</options>
+		</field>
+		<field name="temp_processstarttime" type="datetime">
+			<options>
+				<option name="thirtyMinutesIncrement">true</option>
+				<option name="required">false</option>
+			</options>
+		</field>
+		<field name="temp_responsepayload" type="string">
+			<options>
+				<option name="required">false</option>
+			</options>
+		</field>
+		<field name="temp_event_name" type="string">
+			<options>
+				<option name="required">false</option>
+			</options>
+		</field>
+		<field name="temp_ipass_parentinstance_id" type="double">
+			<options>
+				<option name="required">false</option>
+			</options>
+		</field>
+		<field name="temp_init_ipaas_flg" type="string">
+			<options>
+				<option name="required">false</option>
+				<option hide="true" name="initialvalue">N</option>
+			</options>
+		</field>
+		<field name="temp_locale_lang_cookie" type="string">
+			<options>
+				<option name="required">false</option>
+			</options>
+		</field>
+		<field name="temp_locale_lang" type="string">
+			<options>
+				<option name="required">false</option>
+			</options>
+		</field>
+		<field name="temp_trans_array_List" type="objectlist">
+			<options>
+				<option name="referenceTo">$po:conn-whg-translationPO</option>
+				<option hide="true" name="multiSelect">true</option>
+				<option name="required">false</option>
+				<option name="isCopy">true</option>
+			</options>
+		</field>
+		<field name="temp_memberprofile" type="reference">
+			<options>
+				<option name="referenceTo">OlsonRestAPI:MemberProfile</option>
+				<option name="required">false</option>
+				<option name="isCopy">true</option>
+			</options>
+		</field>
+		<field name="temp_parsejson" type="reference">
+			<options>
+				<option name="referenceTo">$po:$any</option>
+				<option name="required">false</option>
+				<option name="isCopy">true</option>
+			</options>
+		</field>
+		<field name="temp_masked_JSONRequest" type="string">
+			<options>
+				<option name="required">false</option>
+			</options>
+		</field>
+		<field name="temp_device_type_cookie" type="string">
+			<options>
+				<option name="required">false</option>
+			</options>
+		</field>
+		<field name="temp_ipAddress" type="string">
+			<options>
+				<option name="required">false</option>
+			</options>
+		</field>
+		<field name="temp_Preferences_Lang" type="string">
+			<options>
+				<option name="required">false</option>
+			</options>
+		</field>
+		<field name="temp_translated_Preferences" type="string">
+			<options>
+				<option name="required">false</option>
+			</options>
+		</field>
+		<field name="temp_translated_loglocale_lang" type="string">
+			<options>
+				<option name="required">false</option>
+			</options>
+		</field>
+		<field name="temp_transaction_id" type="string">
+			<options>
+				<option name="required">false</option>
+			</options>
+		</field>
+	</tempFields>
+	<notes>Sprint                            : 2.0
+Functionality                 : Enroll a new member
+BPEL Process              : N
+App Dynamics Logging : Y
+Source System             : BWS
+Target System              : OLSON
+Created On                   : 05/05/2017
+Updated On                  : 07/12/2017
+Versioning Details         : 
+V1.0 with basic functionality  - 05/05/2017</notes>
+	<deployment suspendOnFault="false" tracingLevel="none">
+		<rest>
+			<allowAnonymousAccess/>
+		</rest>
+	</deployment>
+	<flow id="a">
+		<start id="b">
+			<link id="j1hg5wbq" targetId="j1hg5wbp"/>
+		</start>
+		<assignment id="j1hg5wbp">
+			<title>Set Title and initialize fields for enrollmemberprofile</title>
+			<operation source="formula" to="temp.temp_processstarttime">
+				<expression language="XQuery">fn:current-dateTime()</expression>
+			</operation>
+			<operation source="formula" to="temp.temp_application_id">
+				<expression language="XQuery">concat(
+	'enrollProcess',
+	"[cid=",
+    util:getProcessId(),
+    "]"
+)</expression>
+			</operation>
+			<operation source="constant" to="temp.temp_event_name">Enroll</operation>
+			<operation source="formula" to="temp.temp_ipass_parentinstance_id">
+				<expression language="XQuery">util:getProcessId()</expression>
+			</operation>
+			<operation source="formula" to="temp.temp_locale_lang_cookie">
+				<expression language="XQuery">let $cookiestring := $input.headers[1]/header[name="cookie"]/value/text()
+let $cookievalues := tokenize($cookiestring,";")
+return fn:normalize-space(substring-after($cookievalues[contains(.,'loglocale')],'='))</expression>
+			</operation>
+			<operation source="formula" to="temp.temp_locale_lang">
+				<expression language="XQuery">if (fn:string-length($temp.temp_locale_lang_cookie) &gt; 0) then
+(
+let $logLocale := (&lt;temp&gt;{util:parseJSON($temp.temp_locale_lang_cookie)}&lt;/temp&gt;)
+
+return $logLocale/language/text()
+)
+else ("")</expression>
+			</operation>
+			<operation source="formula" to="temp.temp_device_type_cookie">
+				<expression language="XQuery">let $cookiestring := $input.headers[1]/header[name="cookie"]/value/text()
+let $cookievalues := tokenize($cookiestring,";")
+return fn:normalize-space(substring-after($cookievalues[contains(.,'device_type')],'='))</expression>
+			</operation>
+			<operation source="formula" to="temp.temp_ipAddress">
+				<expression language="XQuery">$input.headers[1]/header[name="true-client-ip"]/value/text()</expression>
+			</operation>
+			<operation source="formula" to="temp.temp_transaction_id">
+				<expression language="XQuery">if (fn:string-length($temp.temp_locale_lang_cookie) &gt; 0) then
+(
+let $convertedXML := (&lt;root&gt;{util:parseJSON($temp.temp_locale_lang_cookie)}&lt;/root&gt;)
+
+return fn:concat($convertedXML/seed/text(), '-', $convertedXML/pageHashCode/text(), '-', $convertedXML/timestamp/text())
+)
+else ("")</expression>
+			</operation>
+			<link id="jbd8h5di" targetId="jbd8h5dh"/>
+		</assignment>
+		<assignment id="jbd8h7j9">
+			<title>Assign Trans Local Lang</title>
+			<operation source="field" to="temp.temp_translated_loglocale_lang">output.out_translated_lang</operation>
+			<link id="jbd8h7jb" targetId="j8bioopo"/>
+		</assignment>
+		<container id="jbd8h5dh" type="parallel">
+			<title>Parallell 2</title>
+			<flow id="jbd8h5g7">
+				<subflow id="jbd8h5iw">
+					<title>genericLangTranslationProcess - loglocale</title>
+					<subflowPath>genericLangTranslationProcess</subflowPath>
+					<runForEach>false</runForEach>
+					<input>
+						<parameter name="inp_lang" source="field" updatable="true">temp.temp_locale_lang</parameter>
+						<parameter name="inp_lang_source" source="constant" updatable="true">loglocale</parameter>
+						<parameter name="inp_applicationId" source="field" updatable="true">temp.temp_application_id</parameter>
+					</input>
+					<outputDef>
+						<field name="out_translated_lang" type="string">
+							<options>
+								<option name="required">false</option>
+							</options>
+						</field>
+					</outputDef>
+				</subflow>
+				<link id="jbd8h5g8" targetId="jbd8h5dh" type="containerLink"/>
+			</flow>
+			<flow id="jbd8h5ga">
+				<subflow id="jbd8h5li">
+					<title>Basic Validation Sub-Process</title>
+					<subflowPath>genericBasicValProcess</subflowPath>
+					<runForEach>false</runForEach>
+					<input>
+						<parameter name="inp_JSONRequest" source="field" updatable="true">input.JSONRequest</parameter>
+						<parameter name="inp_process_name" source="field" updatable="true">temp.temp_application_id</parameter>
+						<parameter name="inp_ipass_parentinstance_id" source="field" updatable="true">temp.temp_ipass_parentinstance_id</parameter>
+					</input>
+					<outputDef>
+						<field name="out_BVAL_parsejson" type="string">
+							<options>
+								<option name="required">false</option>
+							</options>
+						</field>
+						<field name="out_BVAL_ErrCd" type="string">
+							<options>
+								<option name="required">false</option>
+							</options>
+						</field>
+						<field name="out_BVAL_ErrMsg" type="string">
+							<options>
+								<option name="required">false</option>
+							</options>
+						</field>
+						<field name="out_BVAL_Status" type="string">
+							<options>
+								<option name="required">false</option>
+							</options>
+						</field>
+					</outputDef>
+				</subflow>
+				<link id="jbd8h5gb" targetId="jbd8h5dh" type="containerLink"/>
+			</flow>
+			<link id="jbd8h5g4" targetId="jbd8h5g7" type="containerLink"/>
+			<link id="jbd8h5g5" targetId="jbd8h5ga" type="containerLink"/>
+			<link id="jbd8h7ja" targetId="jbd8h7j9"/>
+		</container>
+		<container id="j8bioopo" type="exclusive">
+			<title>Basic Validation Check</title>
+			<flow id="j8bioorb">
+				<assignment id="j8bioqg6">
+					<title>Parsing and preparing Body Structure</title>
+					<operation source="formula" to="temp.temp_parsejson">
+						<expression language="XQuery">let $convertedXML := (&lt;root&gt;{util:parseJSON($input.JSONRequest)}&lt;/root&gt;)
+
+return $convertedXML
+</expression>
+					</operation>
+					<operation source="formula" to="temp.temp_Preferences_Lang">
+						<expression language="XQuery">for $dataNode in $temp.temp_parsejson/Preferences where ($dataNode/PrefType/text() = 'LanguageOfPreference') return ($dataNode/PreferValue/text())</expression>
+					</operation>
+					<link id="j9zc8ijf" targetId="j9zc8ije"/>
+				</assignment>
+				<assignment id="j9zc8jg2">
+					<title>Parsing and preparing Body Structure</title>
+					<operation source="formula" to="temp.temp_translated_Preferences">
+						<expression language="XQuery">for $dataNode in $temp.temp_parsejson/Preferences
+  return
+     &lt;Preferences&gt;
+        {if ($dataNode/PrefType) then (
+           &lt;PrefType&gt;{$dataNode/PrefType/text()}&lt;/PrefType&gt;
+         )
+         else ()}       
+        {if ($dataNode/PreferLevel) then (
+           (&lt;PreferLevel&gt;{$dataNode/PreferLevel/text()}&lt;/PreferLevel&gt;)
+         )
+         else ()}
+        {if ($dataNode/PreferValue) then (
+            if ($dataNode/PrefType/text() = 'LanguageOfPreference') then
+              (&lt;PreferValue&gt;{$output.out_translated_lang}&lt;/PreferValue&gt;)
+            else (&lt;PreferValue&gt;{$dataNode/PreferValue/text()}&lt;/PreferValue&gt;)
+         )
+         else ()}              
+     &lt;/Preferences&gt;</expression>
+					</operation>
+					<operation source="formula" to="temp.temp_memberprofile">
+						<expression language="XQuery">let $memberprofilepayload := (&lt;root&gt;
+{$temp.temp_parsejson/Customer}
+{$temp.temp_parsejson/AccountInfo}
+{$temp.temp_parsejson/AwardPreference}
+{$temp.temp_parsejson/CustLoyalty}
+{$temp.temp_parsejson/EnrollmentInfo}
+{$temp.temp_parsejson/HotelPreferences}
+{$temp.temp_translated_Preferences}
+{$temp.temp_parsejson/SecurityInfo}
+{$temp.temp_parsejson/loyaltyLevelProgress}
+{$temp.temp_parsejson/UniqueID}
+&lt;/root&gt;)
+
+return ($memberprofilepayload)</expression>
+					</operation>
+				</assignment>
+				<subflow id="j9zc8ije">
+					<title>genericLangTranslationProcess - responsiveui</title>
+					<subflowPath>genericLangTranslationProcess</subflowPath>
+					<runForEach>false</runForEach>
+					<input>
+						<parameter name="inp_lang" source="field" updatable="true">temp.temp_Preferences_Lang</parameter>
+						<parameter name="inp_lang_source" source="constant" updatable="true">responsiveui</parameter>
+						<parameter name="inp_applicationId" source="field" updatable="true">temp.temp_application_id</parameter>
+					</input>
+					<outputDef>
+						<field name="out_translated_lang" type="string">
+							<options>
+								<option name="required">false</option>
+							</options>
+						</field>
+					</outputDef>
+					<link id="j9zc8jg3" targetId="j9zc8jg2"/>
+				</subflow>
+				<link id="j8bioorc" targetId="j8bioopo" type="containerLink"/>
+			</flow>
+			<flow id="j8bioore">
+				<assignment id="j8bioot2">
+					<title>Assign Error Response for Validation</title>
+					<operation source="formula" to="temp.temp_trans_array_List">
+						<expression language="XQuery">&lt;array&gt;
+     &lt;code&gt;{fn:concat('ipaas.', $output.out_BVAL_ErrCd)}&lt;/code&gt;
+     &lt;type&gt;error&lt;/type&gt;
+&lt;/array&gt;</expression>
+					</operation>
+					<link id="j8biop49" targetId="j8biop48"/>
+				</assignment>
+				<assignment id="j8biopdk">
+					<title>Translated Error Message Response for Validation</title>
+					<operation source="formula" to="output.JSONPayload">
+						<expression language="XQuery">let $rootResponse := (&lt;root&gt;
+   &lt;Status&gt;{$temp.temp_init_Status}&lt;/Status&gt;
+   &lt;ErrorCode&gt;{$output.out_BVAL_ErrCd}&lt;/ErrorCode&gt;
+   &lt;ErrorMessage&gt;{if ($output.translation[1]/status/text() = 'success') then ($output.translation[1]/value/text()) else ($output.out_BVAL_ErrMsg)}&lt;/ErrorMessage&gt;
+   &lt;/root&gt;
+)
+
+return util:toJSON($rootResponse/*)
+</expression>
+					</operation>
+					<operation source="formula" to="output.outErrorCode">
+						<expression language="XQuery">$temp.temp_init_HttpCode</expression>
+					</operation>
+					<link id="jbd8h6oc" targetId="jbd8h6ob"/>
+				</assignment>
+				<subflow id="j8biop48">
+					<title>Translated Error Message Sub Process</title>
+					<subflowPath>translationLookupProcess</subflowPath>
+					<runForEach>false</runForEach>
+					<input>
+						<parameter name="language" source="field" updatable="true">temp.temp_translated_loglocale_lang</parameter>
+						<parameter name="array" source="field" updatable="true">temp.temp_trans_array_List</parameter>
+						<parameter name="inp_applicationId" source="field" updatable="true">temp.temp_application_id</parameter>
+					</input>
+					<outputDef>
+						<field name="translation" type="objectlist">
+							<options>
+								<option name="referenceTo">$po:conn-whg-translationPO</option>
+								<option hide="true" name="multiSelect">true</option>
+								<option name="required">false</option>
+								<option name="isCopy">true</option>
+							</options>
+						</field>
+						<field name="error" type="reference">
+							<options>
+								<option name="referenceTo">appDynAnalyticsConnection:ErrorInfo</option>
+								<option name="required">false</option>
+								<option name="isCopy">true</option>
+							</options>
+						</field>
+					</outputDef>
+					<link id="j8biopdl" targetId="j8biopdk"/>
+				</subflow>
+				<jumpTo id="jbd8h6ob">
+					<link id="jbd8h76n" targetId="jadrj8i7"/>
+				</jumpTo>
+			</flow>
+			<link id="j8bioor8" targetId="j8bioorb" type="containerLink">
+				<condition source="formula">
+					<function name="contains">
+						<arg name="left">{$output.out_BVAL_Status}</arg>
+						<arg name="right">Success</arg>
+					</function>
+				</condition>
+			</link>
+			<link id="j8bioor9" targetId="j8bioore" type="containerLink"/>
+			<link id="j8bioopq" targetId="j28s6m9b"/>
+		</container>
+		<eventContainer id="j28s6m9b">
+			<service id="j150qe7v">
+				<title>enrollmemberprofile</title>
+				<serviceName>OlsonRestAPI:POST_profile_do</serviceName>
+				<serviceInput>
+					<parameter name="body" source="field">temp.temp_memberprofile</parameter>
+					<parameter name="transaction_id" source="formula">
+						<expression language="XQuery">if (fn:string-length($temp.temp_transaction_id) = 0) then
+util:generateUUID()
+else
+$temp.temp_transaction_id</expression>
+					</parameter>
+					<parameter name="client_ip_address" source="formula">
+						<expression language="XQuery">if (fn:string-length($temp.temp_ipAddress) = 0) then
+"10.230.0.0"
+else
+$temp.temp_ipAddress</expression>
+					</parameter>
+				</serviceInput>
+			</service>
+			<flow id="j28s6m9e">
+				<container id="j2adn7sj" type="exclusive">
+					<title>Status 200 or Otherwise</title>
+					<flow id="j2adn7t8">
+						<assignment id="j2adn8ci">
+							<title>Assign Success out Message</title>
+							<operation source="field" to="temp.temp_responsepayload">output.sc_out_responsepayload</operation>
+							<operation source="field" to="output.JSONPayload">output.sc_out_json</operation>
+							<operation source="formula" to="output.cookies">
+								<expression language="XQuery">&lt;cookies&gt;
+    &lt;header&gt;
+       &lt;name&gt;cid&lt;/name&gt;
+       &lt;value&gt;; Path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;secure&lt;/value&gt;
+    &lt;/header&gt;
+     &lt;header&gt;
+       &lt;name&gt;WHG_SESSION&lt;/name&gt;
+       &lt;value&gt;; Path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;secure&lt;/value&gt;
+    &lt;/header&gt;
+    &lt;header&gt;
+       &lt;name&gt;WHG_REFRESH&lt;/name&gt;
+       &lt;value&gt;; Path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;secure&lt;/value&gt;
+    &lt;/header&gt;
+&lt;/cookies&gt;</expression>
+							</operation>
+							<link id="jadrj8dt" targetId="jadrj8ds"/>
+						</assignment>
+						<milestone id="jadrj8ds">
+							<title>Main Functionality Done - Success</title>
+							<link id="jadrj8w4" targetId="jadrj8w3"/>
+						</milestone>
+						<subflow id="jadrj8w3">
+							<title>genericLogProcess - Start</title>
+							<subflowPath>genericLogProcess</subflowPath>
+							<runForEach>false</runForEach>
+							<input>
+								<parameter name="inp_flow" source="constant" updatable="true">Start</parameter>
+								<parameter name="inp_processstarttime" source="field" updatable="true">temp.temp_processstarttime</parameter>
+								<parameter name="inp_event_name" source="field" updatable="true">temp.temp_event_name</parameter>
+								<parameter name="inp_process_name" source="field" updatable="true">temp.temp_application_id</parameter>
+								<parameter name="inp_ip_address" source="field" updatable="true">temp.temp_ipAddress</parameter>
+								<parameter name="inp_ipass_parentinstance_id" source="field" updatable="true">temp.temp_ipass_parentinstance_id</parameter>
+								<parameter name="inp_deviceType" source="field" updatable="true">temp.temp_device_type_cookie</parameter>
+								<parameter name="inp_loglocale" source="field" updatable="true">temp.temp_locale_lang_cookie</parameter>
+							</input>
+							<outputDef>
+								<field name="out_status" type="string">
+									<options>
+										<option name="required">false</option>
+									</options>
+								</field>
+							</outputDef>
+							<link id="jadrj8w8" targetId="j63486k9"/>
+						</subflow>
+						<subflow id="j63486k9">
+							<title>genericLogProcess - Success</title>
+							<subflowPath>genericLogProcess</subflowPath>
+							<runForEach>false</runForEach>
+							<input>
+								<parameter name="inp_flow" source="constant" updatable="true">Success</parameter>
+								<parameter name="inp_processstarttime" source="field" updatable="true">temp.temp_processstarttime</parameter>
+								<parameter name="inp_event_name" source="field" updatable="true">temp.temp_event_name</parameter>
+								<parameter name="inp_process_name" source="field" updatable="true">temp.temp_application_id</parameter>
+								<parameter name="inp_ip_address" source="field" updatable="true">temp.temp_ipAddress</parameter>
+								<parameter name="inp_ipass_parentinstance_id" source="field" updatable="true">temp.temp_ipass_parentinstance_id</parameter>
+								<parameter name="inp_deviceType" source="field" updatable="true">temp.temp_device_type_cookie</parameter>
+								<parameter name="inp_loglocale" source="field" updatable="true">temp.temp_locale_lang_cookie</parameter>
+							</input>
+							<outputDef>
+								<field name="out_status" type="string">
+									<options>
+										<option name="required">false</option>
+									</options>
+								</field>
+							</outputDef>
+							<link id="j6370c9a" targetId="j2adn8dw"/>
+						</subflow>
+						<end id="j2adn8dw">
+							<title>End</title>
+						</end>
+					</flow>
+					<flow id="j2adn7tb">
+						<assignment id="j43uw2eb">
+							<title>Error Assignment from Service Connector</title>
+							<operation source="formula" to="temp.temp_init_ErrorCode">
+								<expression language="XQuery">if (fn:string-length($output.sc_out_errorCode) &gt; 0 and fn:string-length($output.sc_out_errorMessage) &gt; 0) then ($output.sc_out_errorCode) 
+else ('0001')</expression>
+							</operation>
+							<operation source="formula" to="temp.temp_ErrorMessage">
+								<expression language="XQuery">if (fn:string-length($output.sc_out_errorCode) &gt; 0 and fn:string-length($output.sc_out_errorMessage) &gt; 0) then ($output.sc_out_errorMessage) 
+else ('System error')</expression>
+							</operation>
+							<operation source="field" to="temp.temp_init_HttpCode">output.sc_out_HTTPStatusCode</operation>
+							<operation source="formula" to="temp.temp_masked_JSONRequest">
+								<expression language="XQuery">let $xmlformat := util:toXML((&lt;root&gt;{util:parseJSON($input.JSONRequest)}&lt;/root&gt;))
+
+let $requestxml := util:parseXML($xmlformat)
+
+let $rootRequest := (&lt;root&gt;
+    {$requestxml/*[not(name()='Customer' or name()='UniqueID' or name()='CustLoyalty' or name()='AccountInfo')]}
+   {if ($requestxml/CustLoyalty) then (
+   (&lt;CustLoyalty&gt;********&lt;/CustLoyalty&gt;)
+   )
+   else ()}
+   {if ($requestxml/AccountInfo) then (
+   (&lt;AccountInfo&gt;********&lt;/AccountInfo&gt;)
+   )
+   else ()}
+   {if ($requestxml/UniqueID) then (
+        &lt;UniqueID&gt;
+           &lt;Id&gt;{fn:concat(fn:substring($requestxml/UniqueID/Id/text(), 1, 4), "****")}&lt;/Id&gt;
+           &lt;Type&gt;{$requestxml/UniqueID/Type/text()}&lt;/Type&gt;
+           &lt;Id_Context&gt;{$requestxml/UniqueID/Id_Context/text()}&lt;/Id_Context&gt;
+        &lt;/UniqueID&gt;
+     )
+    else ()} 
+   {if ($requestxml/Customer) then (
+   (&lt;Customer&gt;
+         &lt;PersonName&gt;
+            {$requestxml/Customer/PersonName/*[not(name()='GivenName' or name()='Surname')]}
+            &lt;GivenName&gt;********&lt;/GivenName&gt;
+            &lt;Surname&gt;********&lt;/Surname&gt;
+         &lt;/PersonName&gt;
+         {if ($requestxml/Customer/Telephones) then (
+         for $dataNode in $requestxml/Customer/Telephones
+         return
+          &lt;Telephones&gt;
+              &lt;PhoneLocationType&gt;{$dataNode/PhoneLocationType/text()}&lt;/PhoneLocationType&gt;
+              &lt;PhoneTechType&gt;{$dataNode/PhoneTechType/text()}&lt;/PhoneTechType&gt;
+              &lt;PhoneNumber&gt;********&lt;/PhoneNumber&gt;
+              &lt;DefaultInd&gt;{$dataNode/DefaultInd/text()}&lt;/DefaultInd&gt;
+          &lt;/Telephones&gt;
+          )
+         else ()}
+         {if ($requestxml/Customer/Emails) then (
+         for $dataNode in $requestxml/Customer/Emails
+         return
+          &lt;Emails&gt;
+              &lt;EmailType&gt;{$dataNode/EmailType/text()}&lt;/EmailType&gt;
+              &lt;DefaultInd&gt;{$dataNode/DefaultInd/text()}&lt;/DefaultInd&gt;
+              &lt;Email&gt;********&lt;/Email&gt;
+          &lt;/Emails&gt;
+         )
+         else ()}
+         {if ($requestxml/Customer/Addresses) then (
+         for $dataNode in $requestxml/Customer/Addresses
+         return
+          &lt;Addresses&gt;
+              &lt;Type&gt;{$dataNode/Type/text()}&lt;/Type&gt;
+              &lt;DefaultInd&gt;{$dataNode/DefaultInd/text()}&lt;/DefaultInd&gt;
+              &lt;AddressLines&gt;********&lt;/AddressLines&gt;
+              {if ($dataNode/CityName) then (
+              (&lt;CityName&gt;********&lt;/CityName&gt;)
+              )
+              else ()}
+              {if ($dataNode/PostalCode) then (
+              (&lt;PostalCode&gt;********&lt;/PostalCode&gt;)
+              )
+              else ()}
+              {if ($dataNode/StateCode) then (
+              (&lt;StateCode&gt;********&lt;/StateCode&gt;)
+              )
+              else ()}
+              {if ($dataNode/CountryCode) then (
+              (&lt;CountryCode&gt;********&lt;/CountryCode&gt;)
+              )
+              else ()}
+              {if ($dataNode/BusinessName) then (
+              (&lt;BusinessName&gt;********&lt;/BusinessName&gt;)
+              )
+              else ()}
+          &lt;/Addresses&gt;
+         )
+         else ()}        
+         {if ($requestxml/Customer/Gender) then (
+         (&lt;Gender&gt;{$requestxml/Customer/Gender/text()}&lt;/Gender&gt;)
+         )
+         else ()}
+         {if ($requestxml/Customer/BirthDate) then (
+         (&lt;Gender&gt;{$requestxml/Customer/BirthDate/text()}&lt;/Gender&gt;)
+         )
+         else ()}
+    &lt;/Customer&gt;)
+   )
+   else ()}
+&lt;/root&gt;)
+
+return util:toJSON($rootRequest/*)</expression>
+							</operation>
+							<operation source="formula" to="temp.temp_init_ipaas_flg">
+								<expression language="XQuery">if ($temp.temp_init_ErrorCode = '0001') then ('Y')
+else ($temp.temp_init_ipaas_flg)</expression>
+							</operation>
+							<link id="j43uw2oi" targetId="j43uw2oh"/>
+						</assignment>
+						<assignment id="j43uw2oh">
+							<title>Assign App Dynamic Summary</title>
+							<operation source="formula" to="temp.temp_trans_array_List">
+								<expression language="XQuery">&lt;array&gt;
+     &lt;code&gt;{if ($temp.temp_init_ipaas_flg = 'Y') then (fn:concat('ipaas.', $temp.temp_init_ErrorCode))
+else (fn:concat('olson.', $temp.temp_init_ErrorCode))}&lt;/code&gt;
+     &lt;type&gt;error&lt;/type&gt;
+&lt;/array&gt;</expression>
+							</operation>
+							<link id="j82z85sf" targetId="j82z85se"/>
+						</assignment>
+						<assignment id="j82z8531">
+							<title>Translated Error Message Response</title>
+							<operation source="formula" to="temp.temp_summary">
+								<expression language="XQuery">let $errorSummary := (&lt;root&gt;
+   &lt;Status&gt;{$temp.temp_init_Status}&lt;/Status&gt;
+   &lt;application_id&gt;{$temp.temp_application_id}&lt;/application_id&gt;
+   &lt;ErrorCode&gt;{$temp.temp_init_ErrorCode}&lt;/ErrorCode&gt;
+   &lt;ErrorMessage&gt;{if ($output.translation[1]/status/text() = 'success') then ($output.translation[1]/value/text()) else ($temp.temp_ErrorMessage)}&lt;/ErrorMessage&gt;
+   &lt;HttpCode&gt;{$temp.temp_init_HttpCode}&lt;/HttpCode&gt;
+   &lt;/root&gt;
+)
+
+return util:toJSON($errorSummary/*)</expression>
+							</operation>
+							<operation source="formula" to="output.JSONPayload">
+								<expression language="XQuery">let $rootResponse := (&lt;root&gt;
+   &lt;Status&gt;{$temp.temp_init_Status}&lt;/Status&gt;
+   &lt;ErrorCode&gt;{$temp.temp_init_ErrorCode}&lt;/ErrorCode&gt;
+   &lt;ErrorMessage&gt;{if ($output.translation[1]/status/text() = 'success') then ($output.translation[1]/value/text()) else ($temp.temp_ErrorMessage)}&lt;/ErrorMessage&gt;
+   &lt;/root&gt;
+)
+
+return util:toJSON($rootResponse/*)
+</expression>
+							</operation>
+							<operation source="formula" to="output.outErrorCode">
+								<expression language="XQuery">$temp.temp_init_HttpCode</expression>
+							</operation>
+							<link id="jadrj8i8" targetId="jadrj8i7"/>
+						</assignment>
+						<subflow id="j82z85se">
+							<title>Translated Error Message Sub Process</title>
+							<subflowPath>translationLookupProcess</subflowPath>
+							<runForEach>false</runForEach>
+							<input>
+								<parameter name="language" source="field" updatable="true">temp.temp_translated_loglocale_lang</parameter>
+								<parameter name="array" source="field" updatable="true">temp.temp_trans_array_List</parameter>
+								<parameter name="inp_applicationId" source="field" updatable="true">temp.temp_application_id</parameter>
+							</input>
+							<outputDef>
+								<field name="translation" type="objectlist">
+									<options>
+										<option name="referenceTo">$po:conn-whg-translationPO</option>
+										<option hide="true" name="multiSelect">true</option>
+										<option name="required">false</option>
+										<option name="isCopy">true</option>
+									</options>
+								</field>
+								<field name="error" type="reference">
+									<options>
+										<option name="referenceTo">appDynAnalyticsConnection:ErrorInfo</option>
+										<option name="required">false</option>
+										<option name="isCopy">true</option>
+									</options>
+								</field>
+							</outputDef>
+							<link id="j82z85ss" targetId="j82z8531"/>
+						</subflow>
+						<subflow id="jadrj8zt">
+							<title>genericLogProcess - Start</title>
+							<subflowPath>genericLogProcess</subflowPath>
+							<runForEach>false</runForEach>
+							<input>
+								<parameter name="inp_flow" source="constant" updatable="true">Start</parameter>
+								<parameter name="inp_processstarttime" source="field" updatable="true">temp.temp_processstarttime</parameter>
+								<parameter name="inp_event_name" source="field" updatable="true">temp.temp_event_name</parameter>
+								<parameter name="inp_process_name" source="field" updatable="true">temp.temp_application_id</parameter>
+								<parameter name="inp_ip_address" source="field" updatable="true">temp.temp_ipAddress</parameter>
+								<parameter name="inp_ipass_parentinstance_id" source="field" updatable="true">temp.temp_ipass_parentinstance_id</parameter>
+								<parameter name="inp_deviceType" source="field" updatable="true">temp.temp_device_type_cookie</parameter>
+								<parameter name="inp_loglocale" source="field" updatable="true">temp.temp_locale_lang_cookie</parameter>
+							</input>
+							<outputDef>
+								<field name="out_status" type="string">
+									<options>
+										<option name="required">false</option>
+									</options>
+								</field>
+							</outputDef>
+							<link id="jadrj8zy" targetId="j63485fx"/>
+						</subflow>
+						<subflow id="j63485fx">
+							<title>genericLogProcess - Error</title>
+							<subflowPath>genericLogProcess</subflowPath>
+							<runForEach>false</runForEach>
+							<input>
+								<parameter name="inp_summary" source="field" updatable="true">temp.temp_summary</parameter>
+								<parameter name="inp_flow" source="constant" updatable="true">Error</parameter>
+								<parameter name="inp_JSONRequest" source="field" updatable="true">temp.temp_masked_JSONRequest</parameter>
+								<parameter name="inp_JSONResponse" source="field" updatable="true">output.JSONPayload</parameter>
+								<parameter name="inp_processstarttime" source="field" updatable="true">temp.temp_processstarttime</parameter>
+								<parameter name="inp_event_name" source="field" updatable="true">temp.temp_event_name</parameter>
+								<parameter name="inp_process_name" source="field" updatable="true">temp.temp_application_id</parameter>
+								<parameter name="inp_ip_address" source="field" updatable="true">temp.temp_ipAddress</parameter>
+								<parameter name="inp_ipass_parentinstance_id" source="field" updatable="true">temp.temp_ipass_parentinstance_id</parameter>
+								<parameter name="inp_deviceType" source="field" updatable="true">temp.temp_device_type_cookie</parameter>
+								<parameter name="inp_loglocale" source="field" updatable="true">temp.temp_locale_lang_cookie</parameter>
+							</input>
+							<outputDef>
+								<field name="out_status" type="string">
+									<options>
+										<option name="required">false</option>
+									</options>
+								</field>
+							</outputDef>
+							<link id="j8bhxg1h" targetId="j2adn8km"/>
+						</subflow>
+						<milestone id="jadrj8i7">
+							<title>Main Functionality Done - Error</title>
+							<link id="jadrj8zu" targetId="jadrj8zt"/>
+						</milestone>
+						<end id="j2adn8km">
+							<title>End of Error Flow</title>
+						</end>
+					</flow>
+					<link id="j2adn7t5" targetId="j2adn7t8" type="containerLink">
+						<condition source="formula">
+							<function name="string-equals">
+								<arg name="left">{$output.sc_out_HTTPStatusCode}</arg>
+								<arg name="right">200</arg>
+							</function>
+						</condition>
+					</link>
+					<link id="j2adn7t6" targetId="j2adn7tb" type="containerLink"/>
+				</container>
+			</flow>
+			<flow id="j28s6m9i">
+				<assignment id="j50i9l27">
+					<title>Assignment to service fault errors</title>
+					<operation source="constant" to="temp.temp_ErrorMessage">Connection Error</operation>
+					<operation source="constant" to="temp.temp_init_ErrorCode">0010</operation>
+					<operation source="constant" to="temp.temp_init_ipaas_flg">Y</operation>
+					<link id="j50i9l7y" targetId="j50i9l7x"/>
+				</assignment>
+				<jumpTo id="j50i9l7x">
+					<link id="j50i9lew" targetId="j43uw2oh"/>
+				</jumpTo>
+			</flow>
+			<link id="j28s6m9c" targetId="j28s6m9e" type="containerLink"/>
+			<events>
+				<catch faultField="faultInfo" id="j28s6m99" interrupting="true">
+					<link id="j28s6m9g" targetId="j28s6m9i" type="containerLink"/>
+				</catch>
+			</events>
+		</eventContainer>
+	</flow>
+</process>

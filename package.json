@@ -9,6 +9,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "gojs": "^1.8.0"
+    "bootstrap": "^3.3.7",
+    "gojs": "^1.8.0",
+    "popper.js": "^1.12.9"
+  },
+  "devDependencies": {
+    "serverless-webpack": "^4.1.0"
   }
 }
