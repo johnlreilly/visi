@@ -108,12 +108,14 @@
           Width: <input id="widthInput" value="1500" style="margin-left: 10px">
           Height: <input id="heightInput" value="1000" style="margin-left: : 10px">
           <button id="makeImages">Generate images for printing</button>
+          <button id="makeSVGs">Generate SVG for printing</button>
         </div>
+        <div id="myImages"></div>
+        <div id="mySVGs"></div>
       </div>
-      <div class="col-3">
+      <div class="col-3 max-height: 400px">
         <h2> JSON from Visualize</h2>
         <div id="visualizeJson">Pending Process Selection...</div>
-        <div id="myImages"></div>
         <h2 style="margin-top: 20px"> XML from BitBucket</h2>
         <div id="processXml">Pending Process Selection...</div>
       </div>
@@ -122,15 +124,16 @@
   <br><br>
 
   <!-- Bootstrap core JavaScript
-  ================================================== -->
-  <!-- Placed at the end of the document so the pages load faster -->
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
 
-  <script src="../release/go.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css">
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"></script>
+    <script src="./go.js"></script>
+    <script src="./popper.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"></script>
 
-<!--   <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script> -->
+    <!--   <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script> -->
 <!--   <script>window.jQuery || document.write('<script src="../../../../assets/js/vendor/jquery.min.js"><\/script>')</script>
   <script src="../../../../assets/js/vendor/popper.min.js"></script>
   <script src="../../../../dist/js/bootstrap.min.js"></script> -->
@@ -138,7 +141,9 @@
 </body>
 </html>
 
-<script id="code" type="text/javascript">
+<!-- <script src="./go.js"></script>
+  <script src="./popper.min.js"></script> -->
+  <script id="code" type="text/javascript">
 
   // require('jquery/dist/jquery');
   // require('popper.js/dist/umd/popper');
@@ -219,11 +224,21 @@
       { angle: 0, layerSpacing: 45, nodeSpacing: 25 }
       );
 
-    var button = document.getElementById('makeImages');
-    button.addEventListener('click', function() {
+
+    var buttonImg = document.getElementById('makeImages');
+    buttonImg.addEventListener('click', function() {
       var width = parseInt(document.getElementById('widthInput').value);
       var height = parseInt(document.getElementById('heightInput').value);
-      generateImages(width, height);
+      var type = "image";
+      generateImages(width, height, type);
+    }, false);
+
+    var buttonSvg = document.getElementById('makeSVGs');
+    buttonSvg.addEventListener('click', function() {
+      var width = parseInt(document.getElementById('widthInput').value);
+      var height = parseInt(document.getElementById('heightInput').value);
+      var type = "svg"
+      generateImages(width, height, type);
     }, false);
 
     listProcesses('ipaas-process-xml','master');
@@ -273,8 +288,8 @@
     document.getElementById("chosenProcess").innerHTML = process;
     var repo = "ipaas-process-xml";
     var revision = "master";
-    // var url = "https://api.bitbucket.org/1.0/repositories/john_reilly/" + repo + "/src/" + revision + "/" + process;
-    var url = "https://bitbucket.org/john_reilly/ipaas-process-xml/raw/dcd1c67373fa59188f91ec13c03c4f0aed487893/" + process;
+    var url = "https://api.bitbucket.org/1.0/repositories/john_reilly/" + repo + "/src/" + revision + "/" + process;
+    // var url = "https://bitbucket.org/john_reilly/ipaas-process-xml/raw/dcd1c67373fa59188f91ec13c03c4f0aed487893/" + process;
 
     console.log("Calling BitBucket for " + process);
     var settings = {
@@ -288,8 +303,8 @@
     }
 
     $.ajax(settings).done(function (response) {
-      console.log("Response from getBitBucketXml: " + JSON.stringify(response));
-      visualize(response);
+      console.log("Response from getBitBucketXml: " + JSON.stringify(response.data));
+      visualize(response.data);
 
     });
 
@@ -297,8 +312,8 @@
 
   function visualize(xmlBitBucket) {
 
-    document.getElementById("processXml").innerHTML = JSON.stringify(xmlBitBucket);
-    debugger;
+    document.getElementById("processXml").innerHTML = xmlBitBucket;
+    // debugger;
     console.log("Start to Visuialize!");
     var settings = {
       "async": true,
@@ -313,7 +328,7 @@
     }
 
     $.ajax(settings).done(function (response) {
-      debugger;
+      // debugger;
       console.log("Returned from IPaaS Endpoint: " + JSON.stringify(response));
       myDiagram.model = new go.GraphLinksModel(response["nodes"], response["links"]);
       document.getElementById("visualizeJson").innerHTML = JSON.stringify(response);
@@ -322,7 +337,7 @@
 
   }
 
-  function generateImages(width, height) {
+  function generateImages(width, height, type) {
     // sanitize input
     width = parseInt(width);
     height = parseInt(height);
@@ -331,6 +346,13 @@
     // Give a minimum size of 50x50
     width = Math.max(width, 50);
     height = Math.max(height, 50);
+
+    var imgDiv;
+    if (type = "image"){
+      imgDiv = document.getElementById('myImages');
+    } else {
+      imgDiv = document.getElementById('mySVGs');
+    }
 
     var imgDiv = document.getElementById('myImages');
     imgDiv.innerHTML = ''; // clear out the old images, if any
@@ -342,14 +364,25 @@
     var p = db.position.copy();
     for (var i = 0; i < boundsheight; i += imgHeight) {
       for (var j = 0; j < boundswidth; j += imgWidth) {
-        img = myDiagram.makeImage({
-          scale: 1,
-          position: new go.Point(p.x + j, p.y + i),
-          size: new go.Size(imgWidth, imgHeight),
-          maxSize: new go.Size(Infinity, Infinity)
-        });
+        if (type = "image"){
+          img = myDiagram.makeImage({
+            scale: 1,
+            position: new go.Point(p.x + j, p.y + i),
+            size: new go.Size(imgWidth, imgHeight),
+            maxSize: new go.Size(Infinity, Infinity)
+          });
+          // img.className = 'images';
+        } else {
+          img = myDiagram.makeSvg({
+            scale: 1,
+            position: new go.Point(p.x + j, p.y + i),
+            size: new go.Size(imgWidth, imgHeight),
+            maxSize: new go.Size(Infinity, Infinity)
+          });
+          // img.className = 'images';
+        }
         // Append the new HTMLImageElement to the #myImages div
-        img.className = 'images';
+        img.className = 'images img-fluid';
         imgDiv.appendChild(img);
         imgDiv.appendChild(document.createElement('br'));
       }

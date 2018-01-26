@@ -99,7 +99,7 @@
 </body>
 </html>
 
-<script src="../go.js"></script>
+<script src="./go.js"></script>
 <script id="code" type="text/javascript">
 
   function initDiagram() {
@@ -284,10 +284,12 @@
     console.log("Calling BitBucket for " + process);
     document.getElementById("chosenProcess").innerHTML = process;
     var repo = "ipaas-process-xml";
-    var revision = "master";
-    var url = "https://api.bitbucket.org/1.0/repositories/john_reilly/" + repo + "/src/" + revision + "/" + process;
-    var url2 = "https://bitbucket.org/john_reilly/ipaas-process-xml/raw/677262b149e1cbd1c3862fc041b9d9d9ed45a650/" + process;
+    var revision = process.revision;
+    var url = "https://bitbucket.org/john_reilly/" + repo + "/raw/" + revision + "/" + process;
+    // var url2 = "https://bitbucket.org/john_reilly/ipaas-process-xml/raw/677262b149e1cbd1c3862fc041b9d9d9ed45a650/" + process;
     // alert("Process: " + process);
+
+    console.log("Url: " + url);
 
     var settings = {
       "async": true,
@@ -316,7 +318,7 @@
     console.log("xmlBitBucket inside Visualize: " + xmlBitBucket);
     document.getElementById("processXml").innerHTML = xmlBitBucket;
     // debugger;
-    console.log("Start to Visuialize!");
+    // console.log("Start to Visuialize!");
     var settings = {
       "async": true,
       "crossDomain": true,
