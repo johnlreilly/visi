@@ -281,6 +281,7 @@
 
   function getBitBucketXml(process) {
 
+    console.log("Calling BitBucket for " + process);
     document.getElementById("chosenProcess").innerHTML = process;
     var repo = "ipaas-process-xml";
     var revision = "master";
@@ -288,7 +289,6 @@
     var url2 = "https://bitbucket.org/john_reilly/ipaas-process-xml/raw/677262b149e1cbd1c3862fc041b9d9d9ed45a650/" + process;
     // alert("Process: " + process);
 
-    console.log("Calling BitBucket for " + process);
     var settings = {
       "async": true,
       "crossDomain": true,
@@ -309,8 +309,13 @@
 
   function visualize(xmlBitBucket) {
 
-    document.getElementById("processXml").innerHTML = JSON.stringify(xmlBitBucket);
-    debugger;
+    console.log("");
+    console.log("");
+    console.log("");
+    console.log("Start to Visuialize!");
+    console.log("xmlBitBucket inside Visualize: " + xmlBitBucket);
+    document.getElementById("processXml").innerHTML = xmlBitBucket;
+    // debugger;
     console.log("Start to Visuialize!");
     var settings = {
       "async": true,
@@ -326,9 +331,10 @@
     }
 
     $.ajax(settings).done(function (response) {
-      debugger;
+      // debugger;
       console.log("Returned from IPaaS Endpoint: " + JSON.stringify(response));
       myDiagram.model = new go.GraphLinksModel(response["nodes"], response["links"]);
+      // document.getElementById("visualizeJson").innerHTML = JSON.stringify(myDiagram.model);
       document.getElementById("visualizeJson").innerHTML = JSON.stringify(response);
 
     });
